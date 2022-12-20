@@ -35,6 +35,7 @@ func (r *ResetPasswordRequest) Validate() error {
 
 type ResetPasswordResponse struct {
 	Message string `json:"message"`
+	Status  bool   `json:"status"`
 }
 
 func ResetPasswordHandler(s *servers.HttpServer) http.HandlerFunc {
@@ -96,6 +97,7 @@ func ResetPasswordHandler(s *servers.HttpServer) http.HandlerFunc {
 		// Return the response
 		utils.SendHttpResponse(w, ResetPasswordResponse{
 			Message: "Reset password successfully",
+			Status:  true,
 		}, http.StatusOK)
 	}
 }
