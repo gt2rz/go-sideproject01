@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"microtwo/models"
-	"microtwo/repositories"
 	"microtwo/servers"
+	"microtwo/utils"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -22,8 +22,8 @@ func GetCustomerByIdHandler(s *servers.HttpServer) http.HandlerFunc {
 		params := mux.Vars(r)
 
 		customer, err := s.CustomerRepository.GetCustomerById(context.Background(), params["id"])
-		
-		if err == repositories.ErrCustomerNotFound {
+
+		if err == utils.ErrCustomerNotFound {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}

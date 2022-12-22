@@ -3,11 +3,11 @@ package auth
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"microtwo/servers"
 	"microtwo/utils"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -54,8 +54,13 @@ func ResetPasswordHandler(s *servers.HttpServer) http.HandlerFunc {
 		// Get the user by reset token
 		user, err := s.UserRepository.GetUserByResetToken(context.Background(), resetToken)
 		if err != nil {
-			fmt.Println(err)
 			utils.SendHttpResponseError(w, utils.ErrAnErrorOccurred, http.StatusInternalServerError)
+			return
+		}
+
+		// Check if the reset token is expired
+		if time.Until(user.PasswordResetTokenAt).Minutes() < 0 {
+			utils.SendHttpResponseError(w, utils.ErrResetTokenExpired, http.StatusUnauthorized)
 			return
 		}
 

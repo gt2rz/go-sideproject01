@@ -3,16 +3,12 @@ package repositories
 import (
 	"context"
 	"database/sql"
-	"errors"
-	"log"
 
 	"github.com/google/uuid"
 
 	"microtwo/models"
+	"microtwo/utils"
 )
-
-var ErrCustomerNotFound = errors.New("customer not found")
-var ErrCustomerNotSaved = errors.New("customer not saved")
 
 type Customers []models.Customer
 
@@ -65,13 +61,12 @@ func (r *CustomerRepositoryImpl) GetCustomersAll(ctx context.Context) (*Customer
 
 func (r *CustomerRepositoryImpl) GetCustomerById(ctx context.Context, id string) (*models.Customer, error) {
 	var customer = models.Customer{}
-	log.Default().Println("id:", id)
 
 	query := r.db.QueryRowContext(ctx, "SELECT id, fullname, email, phone FROM customers WHERE id=?", id)
 	err := query.Scan(&customer.ID, &customer.Fullname, &customer.Email, &customer.Phone)
 
 	if err == sql.ErrNoRows {
-		return nil, ErrCustomerNotFound
+		return nil, utils.ErrCustomerNotFound
 	}
 
 	if err != nil {
@@ -100,7 +95,7 @@ func (r *CustomerRepositoryImpl) SaveCustomer(ctx context.Context, customer mode
 	}
 
 	if rowsAffected != 1 {
-		return ErrCustomerNotSaved
+		return utils.ErrCustomerNotSaved
 	}
 
 	return nil
@@ -119,7 +114,7 @@ func (r *CustomerRepositoryImpl) UpdateCustomer(ctx context.Context, customer mo
 	}
 
 	if rowsAffected != 1 {
-		return ErrCustomerNotFound
+		return utils.ErrCustomerNotFound
 	}
 
 	return nil

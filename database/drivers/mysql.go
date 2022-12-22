@@ -17,6 +17,9 @@ func NewMysqlConnection() *sql.DB {
 		DBName: os.Getenv("DB_NAME"),
 	}
 
+	// ParseTime=true is required to parse DATE and DATETIME values
+	cfg.ParseTime = true
+
 	// Get a database handle.
 	db, err := sql.Open("mysql", cfg.FormatDSN())
 

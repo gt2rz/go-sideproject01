@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"microtwo/models"
-	"microtwo/repositories"
 	"microtwo/servers"
 	"microtwo/utils"
 	"time"
@@ -41,7 +40,7 @@ func SignUpHandler(s *servers.HttpServer) http.HandlerFunc {
 
 		// Check if the user already exists
 		_, err = s.UserRepository.GetUserByEmail(context.Background(), request.Email)
-		if err != repositories.ErrUserNotFound {
+		if err != utils.ErrUserNotFound {
 			utils.SendHttpResponseError(w, utils.ErrUserAlreadyExists, http.StatusBadRequest)
 			return
 		}
