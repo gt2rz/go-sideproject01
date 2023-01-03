@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"microtwo/database"
+	"microtwo/services/mail"
+	"microtwo/services/mail/drivers"
 	"net/http"
 	"os"
 
@@ -18,6 +20,7 @@ type HttpServer struct {
 	db                 *sql.DB
 	port               string
 	router             *mux.Router
+	EmailService       *mail.EmailService
 	CustomerRepository repositories.CustomerRepository
 	UserRepository     repositories.UserRepository
 }
@@ -41,11 +44,17 @@ func NewHttpServer(ctx context.Context) (*HttpServer, error) {
 	customerRepository, _ := repositories.NewCustomerRepository(db)
 	userRepository, _ := repositories.NewUserRepository(db)
 
+	// Create services
+	// Create email service
+	mailDriver := drivers.NewPlainMailDriver()
+	emailService, _ := mail.NewEmailService(mailDriver)
+
 	// Return a new HttpServer
 	return &HttpServer{
 		db,
 		port,
 		mux.NewRouter(),
+		emailService,
 		customerRepository,
 		userRepository,
 	}, nil

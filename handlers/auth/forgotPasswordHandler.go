@@ -3,10 +3,12 @@ package auth
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"microtwo/servers"
+	"microtwo/services/mail/mailables"
 	"microtwo/utils"
 	"net/http"
+	"net/smtp"
 )
 
 type ForgotPasswordRequest struct {
@@ -15,6 +17,32 @@ type ForgotPasswordRequest struct {
 
 type ForgotPasswordResponse struct {
 	Message string `json:"message"`
+}
+
+type loginAuth struct {
+	username, password string
+}
+
+func LoginAuth(username, password string) smtp.Auth {
+	return &loginAuth{username, password}
+}
+
+func (a *loginAuth) Start(server *smtp.ServerInfo) (string, []byte, error) {
+	return "LOGIN", []byte{}, nil
+}
+
+func (a *loginAuth) Next(fromServer []byte, more bool) ([]byte, error) {
+	if more {
+		switch string(fromServer) {
+		case "Username:":
+			return []byte(a.username), nil
+		case "Password:":
+			return []byte(a.password), nil
+		default:
+			return nil, errors.New("unknown fromServer")
+		}
+	}
+	return nil, nil
 }
 
 func ForgotPasswordHandler(s *servers.HttpServer) http.HandlerFunc {
@@ -48,14 +76,15 @@ func ForgotPasswordHandler(s *servers.HttpServer) http.HandlerFunc {
 			return
 		}
 
-		fmt.Println(resetToken)
+		// Create the mail data
+		mailData := mailables.NewResetPasswordEmail(user.Email, resetToken)
 
 		// Send the reset token to the user's email
-		// err = s.EmailService.SendResetPasswordEmail(user.Email, resetToken)
-		// if err != nil {
-		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-		// 	return
-		// }
+		err = s.EmailService.SendResetPasswordEmail(mailData)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		// Return the response
 		utils.SendHttpResponse(w, &ForgotPasswordResponse{
