@@ -23,14 +23,17 @@ type loginAuth struct {
 	username, password string
 }
 
+// LoginAuth returns an smtp.Auth that implements the LOGIN authentication.	
 func LoginAuth(username, password string) smtp.Auth {
 	return &loginAuth{username, password}
 }
 
+// Start starts the SMTP login authentication process.
 func (a *loginAuth) Start(server *smtp.ServerInfo) (string, []byte, error) {
 	return "LOGIN", []byte{}, nil
 }
 
+// Next is called after the server has sent a challenge.
 func (a *loginAuth) Next(fromServer []byte, more bool) ([]byte, error) {
 	if more {
 		switch string(fromServer) {
@@ -45,6 +48,7 @@ func (a *loginAuth) Next(fromServer []byte, more bool) ([]byte, error) {
 	return nil, nil
 }
 
+// ForgotPasswordHandler handles the forgot password request
 func ForgotPasswordHandler(s *servers.HttpServer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var request = ForgotPasswordRequest{}

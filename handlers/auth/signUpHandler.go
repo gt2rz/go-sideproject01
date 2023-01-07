@@ -68,8 +68,10 @@ func SignUpHandler(s *servers.HttpServer) http.HandlerFunc {
 			Lastname:  request.Lastname,
 			Phone:     request.Phone,
 			Verified:  false,
-			CreatedAt: time.Now().String(),
-			UpdatedAt: time.Now().String(),
+			// CreatedAt: time.Now().String(),
+			CreatedAt: time.Now().UTC().Format("2006-01-02 03:04:05"),
+			// UpdatedAt: time.Now().String(),
+			UpdatedAt: time.Now().UTC().Format("2006-01-02 03:04:05"),
 		}
 
 		// Save user to database
